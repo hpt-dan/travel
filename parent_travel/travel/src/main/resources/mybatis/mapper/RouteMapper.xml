@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.travel.mapper.RouteMapper">
+
+    <select id="queryPopulary" resultType="Route">
+       SELECT * FROM tab_route ORDER BY count DESC LIMIT 0,4
+    </select>
+
+    <select id="queryNewDate" resultType="Route">
+      SELECT * FROM tab_route ORDER BY rdate DESC LIMIT 0,4
+    </select>
+
+    <select id="queryIsTheme" resultType="Route">
+        SELECT * FROM tab_route WHERE isThemeTour = '1' ORDER BY rdate DESC LIMIT 0,4
+    </select>
+
+    <select id="queryRouteCount" resultType="int">
+      SELECT COUNT(*) FROM tab_route WHERE rflag = 1
+      <if test="cid!=null">
+          and cid = #{cid}
+      </if>
+
+    <if test="rname!=null and rname.trim()!=''">
+        and rname LIKE '%' #{rname} '%'
+    </if>
+    </select>
+
+    <select id="queryRouteListPage" resultType="Route">
+        SELECT * FROM tab_route WHERE rflag = 1
+        <if test="cid != null">
+           AND cid = #{cid}
+        </if>
+
+        <if test="rname != null and rname.trim()!=''">
+            AND rname LIKE '%' #{rname} '%'
+        </if>
+        limit #{firstResult},#{pageSize}
+    </select>
+
+
+    <resultMap id="queryRouteByRidMap" type="Route" autoMapping="true">
+        <id column="rid" property="rid"/>
+
+        <association property="category" javaType="Category" autoMapping="true">
+            <id column="cid" property="cid"/>
+        </association>
+
+        <association property="seller" javaType="Seller" autoMapping="true">
+            <id column="sid" property="sid"/>
+        </association>
+
+        <collection property="routeImgList" javaType="List" ofType="RouteImg" autoMapping="true">
+            <id column="rgid" property="rgid"></id>
+        </collection>
+
+
+
+    </resultMap>
+
+    <select id="queryRouteByRid" resultMap="queryRouteByRidMap">
+        SELECT
+          *
+        FROM
+            tab_route r
+        LEFT JOIN tab_seller s ON r.sid = s.sid
+        LEFT JOIN tab_category c ON r.cid = c.cid
+        LEFT JOIN tab_route_img i ON r.rid = i.rid
+        WHERE
+            r.rid = #{rid}
+    </select>
+
+    <update id="updateFavoriteCount">
+       UPDATE tab_route SET count = count + 1 WHERE rid = #{rid};
+    </update>
+
+    <select id="queryFavoriteCount" resultType="int">
+        SELECT count from tab_route WHERE rid = #{rid}
+    </select>
+
+    <select id="queryChainRouteListPage" resultType="Route">
+        SELECT
+        *
+        FROM
+        tab_route
+        WHERE
+        cid = 5
+        ORDER BY
+        count DESC
+        LIMIT 0,
+        6;
+    </select>
+
+
+</mapper>

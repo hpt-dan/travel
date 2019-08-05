@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.travel.mapper.FavoriteMapper">
+
+    <select id="isFavoriteByRid" resultType="int">
+        SELECT
+            count(*)
+        FROM
+            tab_favorite
+        WHERE
+            rid = #{rid}
+        AND uid = #{uid};
+    </select>
+
+
+    <insert id="addFavorite">
+        INSERT INTO tab_favorite
+        VALUES
+            (#{rid}, NOW(), #{uid})
+    </insert>
+    
+    <select id="queryMyFavoriteCount" resultType="int">
+        select count(*) from tab_favorite WHERE uid = #{uid};
+    </select>
+
+    <resultMap id="queryFavoriteByPageMap" type="Favorite" autoMapping="true">
+        <association property="route" javaType="Route" autoMapping="true">
+            <id column="rid" property="rid"/>
+        </association>
+    </resultMap>
+
+
+    <select id="queryFavoriteByPage" resultMap="queryFavoriteByPageMap">
+        SELECT
+            *
+        FROM
+            tab_favorite f
+        LEFT JOIN tab_route r ON f.rid = r.rid
+        WHERE
+            uid = #{uid}
+            limit #{firstResult},#{pageSize}
+    </select>
+
+</mapper>
